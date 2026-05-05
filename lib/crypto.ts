@@ -27,7 +27,10 @@ export function encrypt(plain: string): string {
 export function decrypt(payload: string): string {
   const parts = payload.split(':');
   if (parts.length !== 3) throw new Error('Invalid encrypted payload format.');
-  const [iv, tag, enc] = parts.map((p) => Buffer.from(p, 'base64url'));
+  const [ivPart, tagPart, encPart] = parts as [string, string, string];
+  const iv = Buffer.from(ivPart, 'base64url');
+  const tag = Buffer.from(tagPart, 'base64url');
+  const enc = Buffer.from(encPart, 'base64url');
   const decipher = createDecipheriv('aes-256-gcm', getKey(), iv);
   decipher.setAuthTag(tag);
   return Buffer.concat([decipher.update(enc), decipher.final()]).toString('utf8');

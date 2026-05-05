@@ -124,7 +124,6 @@ export async function fetchCampaignPerformance(
     from_date: fromDate,
     to_date: toDate,
     order_by: 'metrics.impressions',
-    order_by_dir: 'DESC',
     limit: 100,
   })) as Array<{
     campaign?: { id?: unknown; name?: unknown; status?: unknown };

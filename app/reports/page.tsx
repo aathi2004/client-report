@@ -251,7 +251,7 @@ function titleCase(s: string) {
   return s
     .toLowerCase()
     .split('_')
-    .map((w) => w[0].toUpperCase() + w.slice(1))
+    .map((w) => (w[0] ?? '').toUpperCase() + w.slice(1))
     .join(' ');
 }
 
