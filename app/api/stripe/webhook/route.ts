@@ -87,7 +87,7 @@ async function handleCheckoutCompleted(event: Stripe.Event) {
   let periodEnd: Date | null = null;
   if (subscriptionId && stripe) {
     const sub = await stripe.subscriptions.retrieve(subscriptionId);
-    periodEnd = new Date(sub.current_period_end * 1000);
+    periodEnd = subscriptionPeriodEnd(sub);
   }
 
   await prisma.user.update({
@@ -136,7 +136,7 @@ async function handleSubscriptionUpdated(event: Stripe.Event) {
       : {
           ...(tier ? { subscriptionTier: tier } : {}),
           stripeSubscriptionId: sub.id,
-          stripeCurrentPeriodEnd: new Date(sub.current_period_end * 1000),
+          stripeCurrentPeriodEnd: subscriptionPeriodEnd(sub),
         },
   });
 
@@ -193,4 +193,19 @@ async function handleInvoicePaymentFailed(event: Stripe.Event) {
   // subscription transitions to `unpaid`/`canceled` and we'll downgrade via
   // customer.subscription.updated/deleted. No DB change needed here yet —
   // hook this up to an email notifier when ready.
+}
+
+// In Stripe API 2025+, `current_period_end` was moved from Subscription to
+// SubscriptionItem. Read from the first item with a fallback for older API versions.
+function subscriptionPeriodEnd(sub: Stripe.Subscription): Date | null {
+  const fromItem = sub.items?.data?.[0]?.current_period_end;
+  if (typeof fromItem === 'number' && fromItem > 0) {
+    return new Date(fromItem * 1000);
+  }
+  // Fallback for older Stripe API versions that still expose it on the subscription.
+  const legacy = (sub as unknown as { current_period_end?: number }).current_period_end;
+  if (typeof legacy === 'number' && legacy > 0) {
+    return new Date(legacy * 1000);
+  }
+  return null;
 }
