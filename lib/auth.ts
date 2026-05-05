@@ -3,7 +3,6 @@ import type { NextAuthOptions } from 'next-auth';
 import { getServerSession } from 'next-auth';
 import type { Adapter } from 'next-auth/adapters';
 import EmailProvider from 'next-auth/providers/email';
-import GoogleProvider from 'next-auth/providers/google';
 import { redirect } from 'next/navigation';
 import { Resend } from 'resend';
 
@@ -19,10 +18,6 @@ export const authOptions: NextAuthOptions = {
     verifyRequest: '/auth/signin?check=email',
   },
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID ?? '',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
-    }),
     EmailProvider({
       from: process.env.EMAIL_FROM,
       sendVerificationRequest: async ({ identifier: email, url }) => {
