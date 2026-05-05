@@ -1,0 +1,17 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "crons": [
+    {
+      "path": "/api/cron/send-scheduled",
+      "schedule": "0 * * * *"
+    }
+  ],
+  "functions": {
+    "app/api/reports/generate/route.ts": { "maxDuration": 60 },
+    "app/api/reports/[id]/email/route.ts": { "maxDuration": 60 },
+    "app/api/reports/send/route.ts": { "maxDuration": 60 },
+    "app/api/cron/send-scheduled/route.ts": { "maxDuration": 300 },
+    "app/api/sources/google-ads/fetch/route.ts": { "maxDuration": 60 }
+  }
+}

@@ -1,0 +1,263 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// Enums
+// ============================================================
+
+enum SubscriptionTier {
+  FREE
+  PRO
+  BUSINESS
+}
+
+enum ClientStatus {
+  ACTIVE
+  PAUSED
+}
+
+enum DataSourceType {
+  GOOGLE_ADS
+  META_ADS
+  GA4
+  INSTAGRAM_INSIGHTS
+}
+
+enum ReportStatus {
+  PENDING
+  GENERATING
+  COMPLETED
+  FAILED
+}
+
+enum ReportType {
+  MONTHLY
+  WEEKLY
+  CUSTOM
+}
+
+enum ScheduleFrequency {
+  WEEKLY
+  MONTHLY
+}
+
+// ============================================================
+// Auth (NextAuth-compatible)
+// ============================================================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+
+  subscriptionTier       SubscriptionTier @default(FREE)
+  stripeCustomerId       String?          @unique
+  stripeSubscriptionId   String?          @unique
+  stripeCurrentPeriodEnd DateTime?
+
+  notificationPrefs Json?
+
+  accounts  Account[]
+  sessions  Session[]
+  agency    Agency?
+  clients   Client[]
+  reports   Report[]
+  templates ReportTemplate[]
+  schedules Schedule[]
+  apiKeys   ApiKey[]
+
+  @@index([email])
+  @@index([createdAt])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ============================================================
+// White-labeling
+// ============================================================
+
+model ApiKey {
+  id         String    @id @default(cuid())
+  userId     String
+  name       String
+  hashedKey  String    @unique
+  lastFour   String
+  createdAt  DateTime  @default(now())
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model Agency {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  name         String
+  logo         String?
+  brandColor   String?
+  customDomain String?  @unique
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+}
+
+// ============================================================
+// Clients & their data sources
+// ============================================================
+
+model Client {
+  id          String       @id @default(cuid())
+  userId      String
+  name        String
+  email       String
+  companyLogo String?
+  status      ClientStatus @default(ACTIVE)
+  createdAt   DateTime     @default(now())
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dataSources DataSource[]
+  reports     Report[]
+  schedules   Schedule[]
+
+  @@index([userId])
+  @@index([email])
+  @@index([createdAt])
+}
+
+model DataSource {
+  id           String         @id @default(cuid())
+  clientId     String
+  type         DataSourceType
+  credentials  String
+  accountId    String?
+  isConnected  Boolean        @default(true)
+  lastSyncedAt DateTime?
+  createdAt    DateTime       @default(now())
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([createdAt])
+}
+
+// ============================================================
+// Reports & templates
+// ============================================================
+
+model Report {
+  id          String       @id @default(cuid())
+  clientId    String
+  userId      String
+  type        ReportType
+  dateFrom    DateTime
+  dateTo      DateTime
+  pdfUrl      String?
+  status      ReportStatus @default(PENDING)
+  generatedAt DateTime?
+  sentAt      DateTime?
+  lastSentTo  String?
+  createdAt   DateTime     @default(now())
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([userId])
+  @@index([createdAt])
+  @@index([status])
+}
+
+model ReportTemplate {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  sections  Json
+  design    Json
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  schedules Schedule[]
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// ============================================================
+// Scheduled report delivery
+// ============================================================
+
+model Schedule {
+  id              String            @id @default(cuid())
+  clientId        String
+  userId          String
+  templateId      String?
+  frequency       ScheduleFrequency
+  dayOfWeek       Int?
+  dayOfMonth      Int?
+  recipientEmails String[]
+  isActive        Boolean           @default(true)
+  lastSentAt      DateTime?
+  nextScheduledAt DateTime?
+  createdAt       DateTime          @default(now())
+
+  client   Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  template ReportTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+
+  @@index([clientId])
+  @@index([userId])
+  @@index([createdAt])
+  @@index([nextScheduledAt])
+}
