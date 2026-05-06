@@ -11,9 +11,18 @@ import { LogoUpload } from './LogoUpload';
 type Props = {
   disabled?: boolean;
   disabledReason?: string;
+  size?: 'default' | 'large';
+  currentCount?: number;
+  limit?: number;
 };
 
-export function AddClientModal({ disabled, disabledReason }: Props) {
+export function AddClientModal({
+  disabled,
+  disabledReason,
+  size = 'default',
+  currentCount,
+  limit,
+}: Props) {
   const router = useRouter();
   const toast = useToast();
   const [open, setOpen] = useState(false);
@@ -59,6 +68,18 @@ export function AddClientModal({ disabled, disabledReason }: Props) {
       reset();
       setOpen(false);
       toast.success('Client added successfully');
+      if (
+        typeof currentCount === 'number' &&
+        typeof limit === 'number' &&
+        Number.isFinite(limit) &&
+        limit > 0
+      ) {
+        const usedAfter = currentCount + 1;
+        const buffer = Math.max(1, Math.floor(limit * 0.2));
+        if (usedAfter < limit && limit - usedAfter <= buffer) {
+          toast.warning(`Approaching client limit (${usedAfter}/${limit})`);
+        }
+      }
       router.refresh();
     } catch {
       toast.error('Connection issue. Please try again.');
@@ -74,9 +95,17 @@ export function AddClientModal({ disabled, disabledReason }: Props) {
         disabled={disabled}
         onClick={() => setOpen(true)}
         title={disabled ? disabledReason : undefined}
-        className="inline-flex items-center gap-2 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+        className={
+          size === 'large'
+            ? 'inline-flex items-center gap-2 rounded-md bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-3 text-base font-medium text-white shadow-md transition-transform hover:-translate-y-0.5 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50'
+            : 'inline-flex items-center gap-2 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50'
+        }
       >
-        <svg viewBox="0 0 20 20" className="h-4 w-4" aria-hidden="true">
+        <svg
+          viewBox="0 0 20 20"
+          className={size === 'large' ? 'h-5 w-5' : 'h-4 w-4'}
+          aria-hidden="true"
+        >
           <path
             fill="currentColor"
             fillRule="evenodd"

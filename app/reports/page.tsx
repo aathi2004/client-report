@@ -248,21 +248,23 @@ function EmptyState({ filtered }: { filtered: boolean }) {
 
   return (
     <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-300 bg-white px-6 py-20 text-center">
-      <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-600 text-white shadow-sm">
-        <svg viewBox="0 0 20 20" className="h-7 w-7" aria-hidden="true">
+      <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-600 text-white shadow-sm">
+        <svg viewBox="0 0 20 20" className="h-8 w-8" aria-hidden="true">
           <path
             fill="currentColor"
-            d="M4 3a2 2 0 012-2h6.586A2 2 0 0114 1.586L17.414 5A2 2 0 0118 6.414V17a2 2 0 01-2 2H6a2 2 0 01-2-2V3zm6 5a1 1 0 10-2 0v2H6a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V8z"
+            d="M4 3a2 2 0 012-2h6.586A2 2 0 0114 1.586L17.414 5A2 2 0 0118 6.414V17a2 2 0 01-2 2H6a2 2 0 01-2-2V3zm3 7a1 1 0 100 2h6a1 1 0 100-2H7zm0 4a1 1 0 100 2h4a1 1 0 100-2H7z"
           />
         </svg>
       </span>
-      <p className="mt-5 text-lg font-semibold text-zinc-900">No reports generated yet</p>
-      <p className="mt-2 max-w-sm text-sm text-zinc-500">Create your first report!</p>
+      <p className="mt-6 text-xl font-semibold text-zinc-900">No reports generated</p>
+      <p className="mt-2 max-w-sm text-sm text-zinc-600">
+        Create your first report to see it here
+      </p>
       <Link
         href="/reports/new"
-        className="mt-6 inline-flex items-center gap-2 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
+        className="mt-8 inline-flex items-center gap-2 rounded-md bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-3 text-base font-medium text-white shadow-md transition-transform hover:-translate-y-0.5 hover:shadow-lg"
       >
-        <svg viewBox="0 0 20 20" className="h-4 w-4" aria-hidden="true">
+        <svg viewBox="0 0 20 20" className="h-5 w-5" aria-hidden="true">
           <path
             fill="currentColor"
             fillRule="evenodd"

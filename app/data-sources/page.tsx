@@ -160,19 +160,31 @@ export default async function DataSourcesPage() {
 
 function EmptyState() {
   return (
-    <div className="mt-3 flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-300 bg-white px-6 py-12 text-center">
-      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100 text-zinc-500">
-        <svg viewBox="0 0 20 20" className="h-6 w-6" aria-hidden="true">
+    <div className="mt-3 flex flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-300 bg-white px-6 py-20 text-center">
+      <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-sm">
+        <svg viewBox="0 0 20 20" className="h-8 w-8" aria-hidden="true">
           <path
             fill="currentColor"
-            d="M3 4a2 2 0 012-2h10a2 2 0 012 2v2a2 2 0 01-2 2H5a2 2 0 01-2-2V4zm0 6a2 2 0 012-2h10a2 2 0 012 2v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-2zm2 4a2 2 0 00-2 2v2a2 2 0 002 2h10a2 2 0 002-2v-2a2 2 0 00-2-2H5z"
+            d="M6.5 1a1 1 0 011 1v3h4V2a1 1 0 112 0v3h.5a2 2 0 012 2v3a5 5 0 01-4 4.9V19a1 1 0 11-2 0v-4.1A5 5 0 015 10V7a2 2 0 012-2h-.5V2a1 1 0 010-1z"
           />
         </svg>
       </span>
-      <p className="mt-3 text-base font-medium text-zinc-900">No data sources connected yet</p>
-      <p className="mt-1 max-w-sm text-sm text-zinc-500">
-        Pick an integration above to start pulling metrics into your client reports.
+      <p className="mt-6 text-xl font-semibold text-zinc-900">No data sources connected</p>
+      <p className="mt-2 max-w-sm text-sm text-zinc-600">
+        Connect Google Ads to pull real campaign data
       </p>
+      <Link
+        href="/data-sources/connect/google-ads"
+        className="mt-8 inline-flex items-center gap-2 rounded-md bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-3 text-base font-medium text-white shadow-md transition-transform hover:-translate-y-0.5 hover:shadow-lg"
+      >
+        <svg viewBox="0 0 20 20" className="h-5 w-5" aria-hidden="true">
+          <path
+            fill="currentColor"
+            d="M11 3a1 1 0 10-2 0v6H3a1 1 0 100 2h6v6a1 1 0 102 0v-6h6a1 1 0 100-2h-6V3z"
+          />
+        </svg>
+        Connect Data Source
+      </Link>
     </div>
   );
 }

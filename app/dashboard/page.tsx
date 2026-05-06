@@ -23,7 +23,7 @@ export default async function DashboardPage() {
 
   const [
     clientCount,
-    dataSourceCount,
+    scheduleCount,
     reportsThisMonth,
     emailsSent,
     storedPdfCount,
@@ -32,7 +32,7 @@ export default async function DashboardPage() {
     agency,
   ] = await Promise.all([
     prisma.client.count({ where: { userId: user.id } }),
-    prisma.dataSource.count({ where: { client: { userId: user.id } } }),
+    prisma.schedule.count({ where: { userId: user.id } }),
     prisma.report.count({
       where: { userId: user.id, createdAt: { gte: startOfMonth } },
     }),
@@ -41,13 +41,13 @@ export default async function DashboardPage() {
     prisma.report.findMany({
       where: { userId: user.id },
       orderBy: { createdAt: 'desc' },
-      take: 6,
+      take: 5,
       include: { client: { select: { name: true } } },
     }),
     prisma.client.findMany({
       where: { userId: user.id },
       orderBy: { createdAt: 'desc' },
-      take: 6,
+      take: 5,
       select: { id: true, name: true, createdAt: true },
     }),
     prisma.agency.findUnique({ where: { userId: user.id } }),
@@ -72,13 +72,6 @@ export default async function DashboardPage() {
       pro: false,
     },
     {
-      key: 'source',
-      label: 'Connect a data source',
-      done: dataSourceCount > 0,
-      href: '/data-sources',
-      pro: false,
-    },
-    {
       key: 'report',
       label: 'Generate a report',
       done: hasAnyReport,
@@ -92,6 +85,13 @@ export default async function DashboardPage() {
       href: '/settings',
       pro: true,
     },
+    {
+      key: 'schedule',
+      label: 'Schedule a report',
+      done: scheduleCount > 0,
+      href: '/schedules/new',
+      pro: true,
+    },
   ];
 
   const isFree = tier === 'FREE';
@@ -100,7 +100,7 @@ export default async function DashboardPage() {
   const allDone = checklist.every((i) => i.done);
   const showChecklist = !allDone && !freeAccessibleDone;
 
-  const activity = buildActivity(recentReports, recentClients).slice(0, 6);
+  const activity = buildActivity(recentReports, recentClients).slice(0, 5);
 
   return (
     <div className="flex min-h-screen flex-1 flex-col bg-zinc-50">
@@ -132,10 +132,6 @@ export default async function DashboardPage() {
               ctaLabel="See plans"
             />
           </div>
-        ) : null}
-
-        {showChecklist ? (
-          <GettingStarted items={checklist} isFree={isFree} />
         ) : null}
 
         <section className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -175,53 +171,48 @@ export default async function DashboardPage() {
           />
         </section>
 
-        <section className="mt-6 rounded-xl border border-zinc-200 bg-white p-6">
+        <section className="mt-6">
           <h2 className="text-sm font-semibold text-zinc-900">Quick actions</h2>
           <p className="mt-1 text-sm text-zinc-600">
-            Get started by adding a client and connecting their data sources.
+            Jump into the most common tasks.
           </p>
-          <div className="mt-4 flex flex-wrap gap-3">
-            {atClientLimit ? (
-              <Link
-                href="/pricing"
-                className="inline-flex items-center gap-2 rounded-md bg-amber-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-amber-600"
-              >
-                <svg viewBox="0 0 20 20" className="h-4 w-4" aria-hidden="true">
-                  <path
-                    fill="currentColor"
-                    d="M10 2a1 1 0 01.78.375l5 6.25A1 1 0 0115 10.25h-3v6.5a1 1 0 01-1 1H9a1 1 0 01-1-1v-6.5H5a1 1 0 01-.78-1.625l5-6.25A1 1 0 0110 2z"
-                  />
-                </svg>
-                Upgrade to add more clients
-              </Link>
-            ) : (
-              <Link
-                href="/clients"
-                className="inline-flex items-center gap-2 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
-              >
-                <svg viewBox="0 0 20 20" className="h-4 w-4" aria-hidden="true">
-                  <path
-                    fill="currentColor"
-                    fillRule="evenodd"
-                    d="M10 3a.75.75 0 01.75.75v5.5h5.5a.75.75 0 010 1.5h-5.5v5.5a.75.75 0 01-1.5 0v-5.5h-5.5a.75.75 0 010-1.5h5.5v-5.5A.75.75 0 0110 3z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                Add Client
-              </Link>
-            )}
-            <Link
-              href="/data-sources"
-              className="inline-flex items-center gap-2 rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-50"
-            >
-              <svg viewBox="0 0 20 20" className="h-4 w-4" aria-hidden="true">
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <QuickAction
+              href="/clients"
+              label="Add Client"
+              description="Create a new client workspace"
+              gradient="from-indigo-500 to-violet-600"
+              icon={
                 <path
                   fill="currentColor"
-                  d="M11 3a1 1 0 10-2 0v6H3a1 1 0 100 2h6v6a1 1 0 102 0v-6h6a1 1 0 100-2h-6V3z"
+                  d="M7 8a3 3 0 100-6 3 3 0 000 6zm6 1a2 2 0 100-4 2 2 0 000 4zm-6 1a5 5 0 00-5 5 1 1 0 001 1h8a1 1 0 001-1 5 5 0 00-5-5zm6 1a4 4 0 00-1.5.29A6 6 0 0113 15v1h4a1 1 0 001-1 4 4 0 00-4-4z"
                 />
-              </svg>
-              Connect Data Source
-            </Link>
+              }
+            />
+            <QuickAction
+              href="/reports/new"
+              label="Generate Report"
+              description="Build a new PDF for any client"
+              gradient="from-violet-500 to-fuchsia-600"
+              icon={
+                <path
+                  fill="currentColor"
+                  d="M4 3a2 2 0 012-2h6.586A2 2 0 0114 1.586L17.414 5A2 2 0 0118 6.414V17a2 2 0 01-2 2H6a2 2 0 01-2-2V3zm6 5a1 1 0 10-2 0v2H6a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V8z"
+                />
+              }
+            />
+            <QuickAction
+              href="/pricing"
+              label="View Pricing"
+              description="Compare plans and upgrade"
+              gradient="from-amber-500 to-orange-600"
+              icon={
+                <path
+                  fill="currentColor"
+                  d="M10 2a1 1 0 011 1v.5a3 3 0 012.6 1.5 1 1 0 11-1.73 1A1 1 0 0011 5h-2a1 1 0 100 2h2a3 3 0 110 6v.5a1 1 0 11-2 0V13a3 3 0 01-2.6-1.5 1 1 0 011.73-1A1 1 0 009 11h2a1 1 0 100-2H9a3 3 0 110-6V2.5a1 1 0 011-.5z"
+                />
+              }
+            />
           </div>
         </section>
 
@@ -254,6 +245,10 @@ export default async function DashboardPage() {
             </ul>
           )}
         </section>
+
+        {showChecklist ? (
+          <GettingStarted items={checklist} isFree={isFree} />
+        ) : null}
       </main>
     </div>
   );
@@ -378,6 +373,51 @@ function StatCard({
   );
 }
 
+function QuickAction({
+  href,
+  label,
+  description,
+  gradient,
+  icon,
+}: {
+  href: string;
+  label: string;
+  description: string;
+  gradient: string;
+  icon: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      className="group flex items-center gap-4 rounded-2xl border border-zinc-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-md"
+    >
+      <span
+        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} text-white shadow-sm`}
+      >
+        <svg viewBox="0 0 20 20" className="h-6 w-6" aria-hidden="true">
+          {icon}
+        </svg>
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-base font-semibold text-zinc-900">{label}</p>
+        <p className="text-sm text-zinc-600">{description}</p>
+      </div>
+      <svg
+        viewBox="0 0 20 20"
+        className="h-4 w-4 text-zinc-400 transition-transform group-hover:translate-x-0.5 group-hover:text-zinc-700"
+        aria-hidden="true"
+      >
+        <path
+          fill="currentColor"
+          fillRule="evenodd"
+          d="M7.3 4.3a1 1 0 011.4 0l5 5a1 1 0 010 1.4l-5 5a1 1 0 01-1.4-1.4L11.6 10 7.3 5.7a1 1 0 010-1.4z"
+          clipRule="evenodd"
+        />
+      </svg>
+    </Link>
+  );
+}
+
 function GettingStarted({
   items,
   isFree,
@@ -491,9 +531,9 @@ function EmptyActivity() {
           />
         </svg>
       </span>
-      <p className="mt-3 text-sm font-medium text-zinc-900">No activity yet</p>
+      <p className="mt-3 text-sm font-medium text-zinc-900">No recent activity</p>
       <p className="mt-1 max-w-sm text-sm text-zinc-500">
-        Add your first client and connect a data source to start generating reports.
+        Reports, emails, and client updates will appear here once you start using the workspace.
       </p>
     </div>
   );

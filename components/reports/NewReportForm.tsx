@@ -8,6 +8,8 @@ import { DataSourceType, ReportType } from '@prisma/client';
 import { Spinner } from '@/components/ui/Spinner';
 import { useToast } from '@/components/ui/Toast';
 
+import { ReportGeneratingOverlay } from './ReportGeneratingOverlay';
+
 type Source = {
   id: string;
   type: DataSourceType;
@@ -122,6 +124,7 @@ export function NewReportForm({ clients }: Props) {
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
+      <ReportGeneratingOverlay open={submitting} />
       <div className="rounded-xl border border-zinc-200 bg-white">
         <div className="border-b border-zinc-100 px-6 py-4">
           <h2 className="text-base font-semibold text-zinc-900">Report details</h2>

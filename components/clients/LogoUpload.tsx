@@ -82,7 +82,7 @@ export function LogoUpload({ value, onChange, label = 'Company logo' }: Props) {
     try {
       const { ok, data } = await uploadWithProgress(file, setProgress);
       if (!ok || !data.url) {
-        const msg = data.error ?? 'Upload failed.';
+        const msg = data.error ?? 'Failed to upload file.';
         setError(msg);
         toast.error(msg);
         return;

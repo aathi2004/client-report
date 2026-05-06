@@ -40,8 +40,8 @@ export default async function SchedulesPage() {
 
         {schedules.length === 0 ? (
           <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-300 bg-white px-6 py-20 text-center">
-            <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 text-white shadow-sm">
-              <svg viewBox="0 0 20 20" className="h-7 w-7" aria-hidden="true">
+            <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 text-white shadow-sm">
+              <svg viewBox="0 0 20 20" className="h-8 w-8" aria-hidden="true">
                 <path
                   fill="currentColor"
                   fillRule="evenodd"
@@ -50,13 +50,15 @@ export default async function SchedulesPage() {
                 />
               </svg>
             </span>
-            <p className="mt-5 text-lg font-semibold text-zinc-900">No scheduled reports</p>
-            <p className="mt-2 max-w-sm text-sm text-zinc-500">Set up automation!</p>
+            <p className="mt-6 text-xl font-semibold text-zinc-900">No scheduled reports</p>
+            <p className="mt-2 max-w-sm text-sm text-zinc-600">
+              Set up automation to save time
+            </p>
             <Link
               href="/schedules/new"
-              className="mt-6 inline-flex items-center gap-2 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
+              className="mt-8 inline-flex items-center gap-2 rounded-md bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-3 text-base font-medium text-white shadow-md transition-transform hover:-translate-y-0.5 hover:shadow-lg"
             >
-              <svg viewBox="0 0 20 20" className="h-4 w-4" aria-hidden="true">
+              <svg viewBox="0 0 20 20" className="h-5 w-5" aria-hidden="true">
                 <path
                   fill="currentColor"
                   fillRule="evenodd"

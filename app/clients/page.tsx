@@ -45,6 +45,8 @@ export default async function ClientsPage() {
           <AddClientModal
             disabled={atLimit}
             disabledReason={`You've reached the ${TIERS[user.subscriptionTier].name} plan limit.`}
+            currentCount={clients.length}
+            limit={isUnlimited(limits.maxClients) ? undefined : limits.maxClients}
           />
         </div>
 
@@ -149,20 +151,20 @@ export default async function ClientsPage() {
 function EmptyState() {
   return (
     <div className="mt-10 flex flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-300 bg-white px-6 py-20 text-center">
-      <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-sm">
-        <svg viewBox="0 0 20 20" className="h-7 w-7" aria-hidden="true">
+      <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-sm">
+        <svg viewBox="0 0 20 20" className="h-8 w-8" aria-hidden="true">
           <path
             fill="currentColor"
             d="M7 8a3 3 0 100-6 3 3 0 000 6zm6 1a2 2 0 100-4 2 2 0 000 4zm-6 1a5 5 0 00-5 5 1 1 0 001 1h8a1 1 0 001-1 5 5 0 00-5-5zm6 1a4 4 0 00-1.5.29A6 6 0 0113 15v1h4a1 1 0 001-1 4 4 0 00-4-4z"
           />
         </svg>
       </span>
-      <p className="mt-5 text-lg font-semibold text-zinc-900">No clients yet</p>
-      <p className="mt-2 max-w-sm text-sm text-zinc-500">
-        Add your first client to get started!
+      <p className="mt-6 text-xl font-semibold text-zinc-900">No clients yet</p>
+      <p className="mt-2 max-w-sm text-sm text-zinc-600">
+        Add your first client to start generating reports
       </p>
-      <div className="mt-6">
-        <AddClientModal />
+      <div className="mt-8">
+        <AddClientModal size="large" />
       </div>
     </div>
   );
