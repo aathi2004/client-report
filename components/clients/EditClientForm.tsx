@@ -5,6 +5,9 @@ import { useState, type FormEvent } from 'react';
 
 import { ClientStatus } from '@prisma/client';
 
+import { Spinner } from '@/components/ui/Spinner';
+import { useToast } from '@/components/ui/Toast';
+
 import { LogoUpload } from './LogoUpload';
 
 type Props = {
@@ -19,6 +22,7 @@ type Props = {
 
 export function EditClientForm({ client }: Props) {
   const router = useRouter();
+  const toast = useToast();
   const [name, setName] = useState(client.name);
   const [email, setEmail] = useState(client.email);
   const [companyLogo, setCompanyLogo] = useState(client.companyLogo ?? '');
@@ -51,7 +55,7 @@ export function EditClientForm({ client }: Props) {
       router.push(`/clients/${client.id}`);
       router.refresh();
     } catch {
-      setError('Network error. Please try again.');
+      toast.error('Connection issue. Please try again.');
       setSaving(false);
     }
   };
@@ -129,9 +133,15 @@ export function EditClientForm({ client }: Props) {
         <button
           type="submit"
           disabled={saving}
-          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:opacity-60"
         >
-          {saving ? 'Saving…' : 'Save changes'}
+          {saving ? (
+            <>
+              <Spinner /> Saving…
+            </>
+          ) : (
+            'Save changes'
+          )}
         </button>
       </div>
 

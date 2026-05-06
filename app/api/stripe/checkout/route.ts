@@ -4,6 +4,7 @@ import Stripe from 'stripe';
 
 import { SubscriptionTier } from '@prisma/client';
 
+import { trackEvent } from '@/lib/analytics';
 import { getCurrentUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { getPriceIdForTier, stripe } from '@/lib/stripe';
@@ -63,6 +64,13 @@ export async function POST(req: Request) {
       console.error('[stripe/checkout] Stripe returned a session without a URL', session.id);
       return NextResponse.json({ error: 'Stripe did not return a checkout URL.' }, { status: 502 });
     }
+
+    await trackEvent('checkout_started', {
+      userId: dbUser.id,
+      tier,
+      sessionId: session.id,
+      fromTier: dbUser.subscriptionTier,
+    });
 
     return NextResponse.json({ url: session.url });
   } catch (err) {

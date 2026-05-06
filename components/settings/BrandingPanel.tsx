@@ -4,6 +4,8 @@ import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 
 import { LogoUpload } from '@/components/clients/LogoUpload';
+import { Spinner } from '@/components/ui/Spinner';
+import { useToast } from '@/components/ui/Toast';
 
 type Props = {
   agency: {
@@ -15,12 +17,12 @@ type Props = {
 
 export function BrandingPanel({ agency }: Props) {
   const router = useRouter();
+  const toast = useToast();
   const [name, setName] = useState(agency.name);
   const [logo, setLogo] = useState<string | null>(agency.logo);
   const [brandColor, setBrandColor] = useState(agency.brandColor ?? '#18181b');
   const [saving, setSaving] = useState(false);
   const [logoSaving, setLogoSaving] = useState(false);
-  const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const persist = async (
@@ -46,13 +48,12 @@ export function BrandingPanel({ agency }: Props) {
   const onLogoChange = async (url: string | null) => {
     setLogo(url);
     setError(null);
-    setSuccess(false);
     if (!name.trim()) return; // no name yet, defer to manual save
     setLogoSaving(true);
     try {
       const ok = await persist({ logo: url });
       if (ok) {
-        setSuccess(true);
+        toast.success('Branding updated');
         router.refresh();
       }
     } finally {
@@ -63,16 +64,15 @@ export function BrandingPanel({ agency }: Props) {
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSaving(true);
-    setSuccess(false);
     setError(null);
     try {
       const ok = await persist({});
       if (ok) {
-        setSuccess(true);
+        toast.success('Branding updated');
         router.refresh();
       }
     } catch {
-      setError('Network error. Please try again.');
+      toast.error('Connection issue. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -136,19 +136,20 @@ export function BrandingPanel({ agency }: Props) {
       {error ? (
         <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
       ) : null}
-      {success ? (
-        <p className="rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
-          Branding saved.
-        </p>
-      ) : null}
 
       <div className="flex justify-end">
         <button
           type="submit"
           disabled={saving || logoSaving}
-          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-60"
         >
-          {saving ? 'Saving…' : 'Save branding'}
+          {saving ? (
+            <>
+              <Spinner /> Saving…
+            </>
+          ) : (
+            'Save branding'
+          )}
         </button>
       </div>
     </form>

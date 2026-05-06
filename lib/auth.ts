@@ -7,6 +7,7 @@ import { redirect } from 'next/navigation';
 import { Resend } from 'resend';
 
 import { prisma } from '@/lib/prisma';
+import { trackEvent } from '@/lib/analytics';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -42,6 +43,14 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
+  events: {
+    async createUser({ user }) {
+      await trackEvent('signup', {
+        userId: user.id ?? null,
+        email: user.email ?? null,
+      });
+    },
+  },
   callbacks: {
     async jwt({ token, user }) {
       // On first sign-in `user` is set; fetch fresh DB user so token has id + tier.

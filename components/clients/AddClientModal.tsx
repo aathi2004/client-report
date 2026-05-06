@@ -3,6 +3,9 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 
+import { Spinner } from '@/components/ui/Spinner';
+import { useToast } from '@/components/ui/Toast';
+
 import { LogoUpload } from './LogoUpload';
 
 type Props = {
@@ -12,6 +15,7 @@ type Props = {
 
 export function AddClientModal({ disabled, disabledReason }: Props) {
   const router = useRouter();
+  const toast = useToast();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -54,9 +58,10 @@ export function AddClientModal({ disabled, disabledReason }: Props) {
       }
       reset();
       setOpen(false);
+      toast.success('Client added successfully');
       router.refresh();
     } catch {
-      setError('Network error. Please try again.');
+      toast.error('Connection issue. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -136,9 +141,15 @@ export function AddClientModal({ disabled, disabledReason }: Props) {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:opacity-60"
                 >
-                  {submitting ? 'Saving…' : 'Add client'}
+                  {submitting ? (
+                    <>
+                      <Spinner /> Saving…
+                    </>
+                  ) : (
+                    'Add client'
+                  )}
                 </button>
               </div>
             </form>

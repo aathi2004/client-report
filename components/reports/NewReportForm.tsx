@@ -5,6 +5,9 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react';
 
 import { DataSourceType, ReportType } from '@prisma/client';
 
+import { Spinner } from '@/components/ui/Spinner';
+import { useToast } from '@/components/ui/Toast';
+
 type Source = {
   id: string;
   type: DataSourceType;
@@ -30,6 +33,7 @@ const TYPE_LABEL: Record<DataSourceType, string> = {
 
 export function NewReportForm({ clients }: Props) {
   const router = useRouter();
+  const toast = useToast();
   const params = useSearchParams();
   const presetClient = params.get('client') ?? '';
 
@@ -90,9 +94,10 @@ export function NewReportForm({ clients }: Props) {
         setSubmitting(false);
         return;
       }
+      toast.success('Report generated and ready to view');
       router.push(`/reports/${data.report.id}`);
     } catch {
-      setError('Network error. Please try again.');
+      toast.error('Connection issue. Please try again.');
       setSubmitting(false);
     }
   };
@@ -273,22 +278,6 @@ export function NewReportForm({ clients }: Props) {
         </button>
       </div>
     </form>
-  );
-}
-
-function Spinner() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className="h-4 w-4 animate-spin"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={3}
-      aria-hidden="true"
-    >
-      <circle cx="12" cy="12" r="9" opacity="0.25" />
-      <path d="M21 12a9 9 0 0 1-9 9" />
-    </svg>
   );
 }
 

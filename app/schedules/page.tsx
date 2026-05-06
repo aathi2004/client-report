@@ -39,11 +39,33 @@ export default async function SchedulesPage() {
         </div>
 
         {schedules.length === 0 ? (
-          <div className="mt-6 flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-300 bg-white px-6 py-16 text-center">
-            <p className="text-base font-medium text-zinc-900">No schedules yet</p>
-            <p className="mt-1 max-w-sm text-sm text-zinc-500">
-              Create a recurring schedule to email reports to clients on a weekly or monthly cadence.
-            </p>
+          <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-300 bg-white px-6 py-20 text-center">
+            <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 text-white shadow-sm">
+              <svg viewBox="0 0 20 20" className="h-7 w-7" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .2.08.39.22.53l3 3a.75.75 0 101.06-1.06L10.75 9.69V5z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </span>
+            <p className="mt-5 text-lg font-semibold text-zinc-900">No scheduled reports</p>
+            <p className="mt-2 max-w-sm text-sm text-zinc-500">Set up automation!</p>
+            <Link
+              href="/schedules/new"
+              className="mt-6 inline-flex items-center gap-2 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
+            >
+              <svg viewBox="0 0 20 20" className="h-4 w-4" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  fillRule="evenodd"
+                  d="M10 3a.75.75 0 01.75.75v5.5h5.5a.75.75 0 010 1.5h-5.5v5.5a.75.75 0 01-1.5 0v-5.5h-5.5a.75.75 0 010-1.5h5.5v-5.5A.75.75 0 0110 3z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              Create Schedule
+            </Link>
           </div>
         ) : (
           <section className="mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-white">

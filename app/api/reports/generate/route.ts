@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { ReportType } from '@prisma/client';
 
+import { trackEvent } from '@/lib/analytics';
 import { getCurrentUser } from '@/lib/auth';
 import { ReportGenerateError, generateReport } from '@/lib/reports/generate';
 import { checkReportLimit } from '@/lib/subscription';
@@ -57,6 +58,13 @@ export async function POST(req: Request) {
       dateFrom,
       dateTo,
       sourceIds: body.sourceIds ?? [],
+    });
+    await trackEvent('report_generated', {
+      userId: user.id,
+      reportId: report.id,
+      clientId: body.clientId,
+      type: body.type,
+      tier: user.subscriptionTier,
     });
     return NextResponse.json({ report });
   } catch (err) {

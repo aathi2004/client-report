@@ -148,19 +148,22 @@ export default async function ClientsPage() {
 
 function EmptyState() {
   return (
-    <div className="mt-10 flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-300 bg-white px-6 py-16 text-center">
-      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100 text-zinc-500">
-        <svg viewBox="0 0 20 20" className="h-6 w-6" aria-hidden="true">
+    <div className="mt-10 flex flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-300 bg-white px-6 py-20 text-center">
+      <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-sm">
+        <svg viewBox="0 0 20 20" className="h-7 w-7" aria-hidden="true">
           <path
             fill="currentColor"
-            d="M10 9a4 4 0 100-8 4 4 0 000 8zM2 18a8 8 0 1116 0H2z"
+            d="M7 8a3 3 0 100-6 3 3 0 000 6zm6 1a2 2 0 100-4 2 2 0 000 4zm-6 1a5 5 0 00-5 5 1 1 0 001 1h8a1 1 0 001-1 5 5 0 00-5-5zm6 1a4 4 0 00-1.5.29A6 6 0 0113 15v1h4a1 1 0 001-1 4 4 0 00-4-4z"
           />
         </svg>
       </span>
-      <p className="mt-3 text-base font-medium text-zinc-900">No clients yet</p>
-      <p className="mt-1 max-w-sm text-sm text-zinc-500">
-        Add your first client to get started.
+      <p className="mt-5 text-lg font-semibold text-zinc-900">No clients yet</p>
+      <p className="mt-2 max-w-sm text-sm text-zinc-500">
+        Add your first client to get started!
       </p>
+      <div className="mt-6">
+        <AddClientModal />
+      </div>
     </div>
   );
 }

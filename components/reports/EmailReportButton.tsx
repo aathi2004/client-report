@@ -2,6 +2,8 @@
 
 import { useEffect, useState, type FormEvent } from 'react';
 
+import { useToast } from '@/components/ui/Toast';
+
 type Props = {
   id: string;
   defaultTo: string;
@@ -19,11 +21,11 @@ export function EmailReportButton({
   label = 'Email to client',
   disabled,
 }: Props) {
+  const toast = useToast();
   const [open, setOpen] = useState(false);
   const [to, setTo] = useState(defaultTo);
   const [note, setNote] = useState('');
   const [sending, setSending] = useState(false);
-  const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -31,7 +33,6 @@ export function EmailReportButton({
     setTo(defaultTo);
     setNote('');
     setError(null);
-    setSuccess(null);
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setOpen(false);
     };
@@ -43,7 +44,6 @@ export function EmailReportButton({
     e.preventDefault();
     setSending(true);
     setError(null);
-    setSuccess(null);
     try {
       const res = await fetch(`/api/reports/${id}/email`, {
         method: 'POST',
@@ -55,10 +55,11 @@ export function EmailReportButton({
         setError(data.error ?? 'Could not send email.');
         return;
       }
-      setSuccess(`Sent to ${data.sentTo ?? to}.`);
-      setTimeout(() => setOpen(false), 1200);
+      const sentTo = data.sentTo ?? to;
+      toast.success(`Report emailed to ${sentTo}`);
+      setOpen(false);
     } catch {
-      setError('Network error. Please try again.');
+      toast.error('Connection issue. Please try again.');
     } finally {
       setSending(false);
     }
@@ -140,11 +141,6 @@ export function EmailReportButton({
 
               {error ? (
                 <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
-              ) : null}
-              {success ? (
-                <p className="rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
-                  {success}
-                </p>
               ) : null}
 
               <div className="flex items-center justify-end gap-2 border-t border-zinc-100 pt-4">

@@ -2,6 +2,8 @@
 
 import { useRef, useState, type ChangeEvent } from 'react';
 
+import { useToast } from '@/components/ui/Toast';
+
 const ACCEPT = 'image/jpeg,image/png,image/webp';
 const MAX_BYTES = 20 * 1024 * 1024;
 
@@ -11,9 +13,47 @@ type Props = {
   label?: string;
 };
 
+type UploadResult = { url?: string; error?: string };
+
+function uploadWithProgress(
+  file: File,
+  onProgress: (pct: number) => void,
+): Promise<{ ok: boolean; data: UploadResult }> {
+  return new Promise((resolve) => {
+    const xhr = new XMLHttpRequest();
+    const body = new FormData();
+    body.append('file', file);
+
+    xhr.upload.addEventListener('progress', (e) => {
+      if (e.lengthComputable) {
+        onProgress(Math.round((e.loaded / e.total) * 100));
+      }
+    });
+
+    xhr.addEventListener('load', () => {
+      let parsed: UploadResult = {};
+      try {
+        parsed = JSON.parse(xhr.responseText) as UploadResult;
+      } catch {
+        parsed = { error: 'Unexpected server response.' };
+      }
+      resolve({ ok: xhr.status >= 200 && xhr.status < 300, data: parsed });
+    });
+
+    xhr.addEventListener('error', () => {
+      resolve({ ok: false, data: { error: 'Network error. Please try again.' } });
+    });
+
+    xhr.open('POST', '/api/uploads/logo');
+    xhr.send(body);
+  });
+}
+
 export function LogoUpload({ value, onChange, label = 'Company logo' }: Props) {
+  const toast = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
   const onPick = () => inputRef.current?.click();
@@ -24,30 +64,33 @@ export function LogoUpload({ value, onChange, label = 'Company logo' }: Props) {
     if (!file) return;
 
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-      setError('Unsupported format. Use JPG, PNG, or WebP.');
+      const msg = 'Unsupported format. Use JPG, PNG, or WebP.';
+      setError(msg);
+      toast.error(msg);
       return;
     }
     if (file.size > MAX_BYTES) {
-      setError('File is too large. Max size is 20 MB.');
+      const msg = 'File too large. Max 20MB.';
+      setError(msg);
+      toast.error(msg);
       return;
     }
 
     setError(null);
+    setProgress(0);
     setUploading(true);
     try {
-      const body = new FormData();
-      body.append('file', file);
-      const res = await fetch('/api/uploads/logo', { method: 'POST', body });
-      const data = (await res.json()) as { url?: string; error?: string };
-      if (!res.ok || !data.url) {
-        setError(data.error ?? 'Upload failed.');
+      const { ok, data } = await uploadWithProgress(file, setProgress);
+      if (!ok || !data.url) {
+        const msg = data.error ?? 'Upload failed.';
+        setError(msg);
+        toast.error(msg);
         return;
       }
       onChange(data.url);
-    } catch {
-      setError('Network error. Please try again.');
     } finally {
       setUploading(false);
+      setProgress(0);
     }
   };
 
@@ -96,7 +139,25 @@ export function LogoUpload({ value, onChange, label = 'Company logo' }: Props) {
           ) : null}
         </div>
       </div>
-      <p className="mt-1.5 text-xs text-zinc-500">JPG, PNG, or WebP · max 20 MB</p>
+      {uploading ? (
+        <div className="mt-3">
+          <div
+            role="progressbar"
+            aria-valuenow={progress}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-100"
+          >
+            <div
+              className="h-full bg-gradient-to-r from-indigo-500 to-violet-600 transition-[width] duration-150 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <p className="mt-1 text-xs text-zinc-500">Uploading… {progress}%</p>
+        </div>
+      ) : (
+        <p className="mt-1.5 text-xs text-zinc-500">JPG, PNG, or WebP · max 20 MB</p>
+      )}
       {error ? <p className="mt-1.5 text-xs text-red-600">{error}</p> : null}
     </div>
   );

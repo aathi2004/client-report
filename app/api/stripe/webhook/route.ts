@@ -4,6 +4,7 @@ import Stripe from 'stripe';
 
 import { SubscriptionTier } from '@prisma/client';
 
+import { trackEvent } from '@/lib/analytics';
 import { prisma } from '@/lib/prisma';
 import { stripe } from '@/lib/stripe';
 
@@ -90,6 +91,11 @@ async function handleCheckoutCompleted(event: Stripe.Event) {
     periodEnd = subscriptionPeriodEnd(sub);
   }
 
+  const previous = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { subscriptionTier: true },
+  });
+
   await prisma.user.update({
     where: { id: userId },
     data: {
@@ -98,6 +104,13 @@ async function handleCheckoutCompleted(event: Stripe.Event) {
       stripeSubscriptionId: subscriptionId,
       stripeCurrentPeriodEnd: periodEnd,
     },
+  });
+
+  await trackEvent('plan_upgraded', {
+    userId,
+    fromTier: previous?.subscriptionTier ?? null,
+    toTier: tier,
+    subscriptionId,
   });
 
   console.log(

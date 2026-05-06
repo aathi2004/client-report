@@ -3,12 +3,16 @@
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 
+import { Spinner } from '@/components/ui/Spinner';
+import { useToast } from '@/components/ui/Toast';
+
 type Props = {
   user: { name: string | null; email: string };
 };
 
 export function ProfilePanel({ user }: Props) {
   const router = useRouter();
+  const toast = useToast();
   const [name, setName] = useState(user.name ?? '');
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -33,7 +37,7 @@ export function ProfilePanel({ user }: Props) {
       setSuccess(true);
       router.refresh();
     } catch {
-      setError('Network error. Please try again.');
+      toast.error('Connection issue. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -99,9 +103,15 @@ export function ProfilePanel({ user }: Props) {
         <button
           type="submit"
           disabled={saving}
-          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-60"
         >
-          {saving ? 'Saving…' : 'Save changes'}
+          {saving ? (
+            <>
+              <Spinner /> Saving…
+            </>
+          ) : (
+            'Save changes'
+          )}
         </button>
       </div>
     </form>

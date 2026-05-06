@@ -5,6 +5,9 @@ import { useState, type FormEvent } from 'react';
 
 import { ScheduleFrequency } from '@prisma/client';
 
+import { Spinner } from '@/components/ui/Spinner';
+import { useToast } from '@/components/ui/Toast';
+
 type Client = { id: string; name: string; email: string };
 
 type Props = { clients: Client[] };
@@ -13,6 +16,7 @@ const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 
 
 export function NewScheduleForm({ clients }: Props) {
   const router = useRouter();
+  const toast = useToast();
   const [clientId, setClientId] = useState(clients[0]?.id ?? '');
   const [frequency, setFrequency] = useState<ScheduleFrequency>('MONTHLY');
   const [dayOfWeek, setDayOfWeek] = useState(1);
@@ -50,7 +54,7 @@ export function NewScheduleForm({ clients }: Props) {
       router.push('/schedules');
       router.refresh();
     } catch {
-      setError('Network error. Please try again.');
+      toast.error('Connection issue. Please try again.');
       setSubmitting(false);
     }
   };
@@ -190,9 +194,15 @@ export function NewScheduleForm({ clients }: Props) {
         <button
           type="submit"
           disabled={submitting || !clientId}
-          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-60"
         >
-          {submitting ? 'Saving…' : 'Create schedule'}
+          {submitting ? (
+            <>
+              <Spinner /> Saving…
+            </>
+          ) : (
+            'Create schedule'
+          )}
         </button>
       </div>
     </form>
